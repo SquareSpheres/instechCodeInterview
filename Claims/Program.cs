@@ -1,9 +1,18 @@
-using Claims.Auditing;
-using Claims.Controllers;
-using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
+using Claims.Auditing;
+using Claims.Auditing.BackgroundProcessing;
+using Claims.Core.Contexts;
+using Claims.Core.Infrastructure;
+using Claims.Features.Claims.Repositories;
+using Claims.Features.Claims.Services;
+using Claims.Features.Covers.Repositories;
+using Claims.Features.Covers.Services;
+using Claims.Features.Covers.Services.PremiumTiers;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using Testcontainers.MongoDb;
 using Testcontainers.MsSql;
 
@@ -13,8 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 var sqlContainer = (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
         ? new MsSqlBuilder()
             .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
-        : new()
-
+        : new MsSqlBuilder()
     ).Build();
 
 var mongoContainer = new MongoDbBuilder()
@@ -27,10 +35,10 @@ await mongoContainer.StartAsync();
 // Add services to the container.
 builder.Services
     .AddControllers()
-    .AddJsonOptions(x =>
-    {
-        x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });
+    .AddJsonOptions(x => { x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddDbContext<AuditContext>(options =>
     options.UseSqlServer(sqlContainer.GetConnectionString()));
@@ -38,9 +46,21 @@ builder.Services.AddDbContext<AuditContext>(options =>
 builder.Services.AddDbContext<ClaimsContext>(options =>
 {
     var client = new MongoClient(mongoContainer.GetConnectionString());
-    var database = client.GetDatabase(builder.Configuration["MongoDb:DatabaseName"]); // Use a default/test database name
+    var database =
+        client.GetDatabase(builder.Configuration["MongoDb:DatabaseName"]); // Use a default/test database name
     options.UseMongoDB(database.Client, database.DatabaseNamespace.DatabaseName);
 });
+
+builder.Services.AddScoped<IAuditer, Auditer>();
+builder.Services.AddSingleton<IAuditQueue, InMemoryAuditQueue>();
+builder.Services.AddScoped<IClaimsRepository, ClaimsRepository>();
+builder.Services.AddScoped<ICoverRepository, CoverRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork<ClaimsContext>>();
+builder.Services.AddScoped<IClaimsService, ClaimsService>();
+builder.Services.AddScoped<ICoverService, CoverService>();
+builder.Services.AddSingleton<IPremiumCalculatorService, PremiumCalculatorService>();
+builder.Services.AddSingleton<IPremiumTierFactory, PremiumTierFactory>();
+builder.Services.AddHostedService<AuditBackgroundService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -69,4 +89,7 @@ using (var scope = app.Services.CreateScope())
 
 app.Run();
 
-public partial class Program { }
+namespace Claims
+{
+    public class Program;
+}

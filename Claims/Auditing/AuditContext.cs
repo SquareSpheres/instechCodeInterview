@@ -1,13 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Claims.Auditing
+namespace Claims.Auditing;
+
+public class AuditContext(DbContextOptions<AuditContext> options) : DbContext(options)
 {
-    public class AuditContext : DbContext
+    public DbSet<ClaimAuditEntity> ClaimAudits { get; set; }
+    public DbSet<CoverAuditEntity> CoverAudits { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        public AuditContext(DbContextOptions<AuditContext> options) : base(options)
-        {
-        }
-        public DbSet<ClaimAudit> ClaimAudits { get; set; }
-        public DbSet<CoverAudit> CoverAudits { get; set; }
+        modelBuilder.Entity<ClaimAuditEntity>().ToTable("ClaimAudits");
+        modelBuilder.Entity<CoverAuditEntity>().ToTable("CoverAudits");
     }
 }
