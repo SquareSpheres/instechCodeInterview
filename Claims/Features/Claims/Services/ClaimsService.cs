@@ -1,5 +1,6 @@
 using Claims.Auditing;
 using Claims.Core.Infrastructure;
+using Claims.Core.Exceptions;
 using Claims.Features.Claims.Mappers;
 using Claims.Features.Claims.Models;
 using Claims.Features.Claims.Repositories;
@@ -11,7 +12,8 @@ public class ClaimsService(
     IAuditer auditer,
     IClaimsRepository claimsRepository,
     ICoverRepository coverRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    ILogger<ClaimsService> logger)
     : IClaimsService
 {
     // TODO paging?
@@ -30,6 +32,10 @@ public class ClaimsService(
         await claimsRepository.AddItemAsync(claimEntity);
         await unitOfWork.SaveChangesAsync();
         auditer.AuditClaim(claimEntity.Id, "POST");
+        
+        logger.LogInformation("Created claim {ClaimId} for cover {CoverId} with damage cost {DamageCost}", 
+            claimEntity.Id, dto.CoverId, dto.DamageCost);
+        
         return claimEntity.ToDto();
     }
 
@@ -44,7 +50,10 @@ public class ClaimsService(
     public async Task<ClaimDto> GetAsync(string id)
     {
         var claim = await claimsRepository.GetClaimOrNullAsync(id);
-        if (claim == null) throw new KeyNotFoundException($"Claim with id {id} not found");
+        if (claim == null)
+        {
+            throw new ClaimNotFoundException(id);
+        }
 
         return claim.ToDto();
     }
@@ -55,15 +64,13 @@ public class ClaimsService(
 
         if (cover == null)
         {
-            throw new ArgumentException($"Cover with ID {dto.CoverId} does not exist");
+            throw new CoverNotFoundException(dto.CoverId);
         }
 
         var today = DateOnly.FromDateTime(DateTime.Now.Date);
         if (today < cover.StartDate || today > cover.EndDate)
         {
-            throw new ArgumentException(
-                $"Claims can only be made during the coverage period ({cover.StartDate:yyyy-MM-dd} to {cover.EndDate:yyyy-MM-dd}). " +
-                $"Current date: {today:yyyy-MM-dd}");
+            throw new CoverageValidationException(dto.CoverId, today, cover.StartDate, cover.EndDate);
         }
     }
 }

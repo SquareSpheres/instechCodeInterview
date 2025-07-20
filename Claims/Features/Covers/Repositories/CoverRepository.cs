@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Claims.Features.Covers.Repositories;
 
-public class CoverRepository(ClaimsContext claimsContext) : ICoverRepository
+public class CoverRepository(ClaimsContext claimsContext, ILogger<CoverRepository> logger) : ICoverRepository
 {
     public async Task<IEnumerable<CoverEntity>> GetCoversAsync()
     {
@@ -26,6 +26,13 @@ public class CoverRepository(ClaimsContext claimsContext) : ICoverRepository
     public async Task DeleteItemAsync(string id)
     {
         var cover = await GetCoverOrNullAsync(id);
-        if (cover is not null) claimsContext.Covers.Remove(cover);
+        if (cover is not null) 
+        {
+            claimsContext.Covers.Remove(cover);
+        }
+        else
+        {
+            logger.LogWarning("Attempted to delete non-existent cover: {CoverId}", id);
+        }
     }
 }

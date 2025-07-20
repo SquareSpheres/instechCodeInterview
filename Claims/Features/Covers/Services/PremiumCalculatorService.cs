@@ -1,9 +1,10 @@
+using Claims.Core.Exceptions;
 using Claims.Features.Covers.Models;
 using Claims.Features.Covers.Services.PremiumTiers;
 
 namespace Claims.Features.Covers.Services;
 
-public class PremiumCalculatorService(IPremiumTierFactory tierFactory) : IPremiumCalculatorService
+public class PremiumCalculatorService(IPremiumTierFactory tierFactory, ILogger<PremiumCalculatorService> logger) : IPremiumCalculatorService
 {
     private const decimal BaseDayRate = 1250m;
     private readonly List<IPremiumTier> _premiumTiers = tierFactory.CreatePremiumTiers().ToList();
@@ -12,12 +13,18 @@ public class PremiumCalculatorService(IPremiumTierFactory tierFactory) : IPremiu
     {
         var insuranceLengthDays = (int)Math.Ceiling((endDate - startDate).TotalDays);
         if (insuranceLengthDays <= 0)
-            return 0m;
+        {
+            throw new InvalidDateRangeException(startDate, endDate);
+        }
 
         var basePremiumPerDay = GetBasePremiumPerDay(coverType);
-
-        return _premiumTiers.Sum(tier =>
+        var totalPremium = _premiumTiers.Sum(tier =>
             tier.CalculatePremium(insuranceLengthDays, basePremiumPerDay, coverType));
+        
+        logger.LogInformation("Calculated premium {Premium} for {CoverType} over {Days} days", 
+            totalPremium, coverType, insuranceLengthDays);
+        
+        return totalPremium;
     }
 
     private static decimal GetBasePremiumPerDay(CoverType coverType)

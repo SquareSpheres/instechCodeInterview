@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Claims.Features.Claims.Models;
 using Claims.Features.Covers.Models;
 using System.Text;
@@ -34,7 +35,8 @@ public class ClaimsControllerTests
         // Verify response is an empty array when no claims exist
         var claims = JsonSerializer.Deserialize<ClaimDto[]>(responseString, new JsonSerializerOptions
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter() }
         });
         
         Assert.NotNull(claims);
@@ -62,7 +64,10 @@ public class ClaimsControllerTests
             Premium = 1000.00m
         };
         
-        var coverJson = JsonSerializer.Serialize(createCoverDto);
+        var coverJson = JsonSerializer.Serialize(createCoverDto, new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter() }
+        });
         var coverContent = new StringContent(coverJson, Encoding.UTF8, "application/json");
         
         var coverResponse = await client.PostAsync("/Covers", coverContent);
@@ -71,7 +76,8 @@ public class ClaimsControllerTests
         var coverResponseString = await coverResponse.Content.ReadAsStringAsync();
         var cover = JsonSerializer.Deserialize<CoverDto>(coverResponseString, new JsonSerializerOptions
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter() }
         });
         
         Assert.NotNull(cover);
@@ -86,7 +92,10 @@ public class ClaimsControllerTests
             DamageCost = 5000.00m
         };
         
-        var claimJson = JsonSerializer.Serialize(createClaimDto);
+        var claimJson = JsonSerializer.Serialize(createClaimDto, new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter() }
+        });
         var claimContent = new StringContent(claimJson, Encoding.UTF8, "application/json");
         
         var createClaimResponse = await client.PostAsync("/Claims", claimContent);
@@ -107,7 +116,8 @@ public class ClaimsControllerTests
         // Verify response contains the created claim
         var claims = JsonSerializer.Deserialize<ClaimDto[]>(responseString, new JsonSerializerOptions
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter() }
         });
         
         Assert.NotNull(claims);

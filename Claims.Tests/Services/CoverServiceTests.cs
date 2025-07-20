@@ -3,6 +3,7 @@ using Claims.Core.Infrastructure;
 using Claims.Features.Covers.Models;
 using Claims.Features.Covers.Repositories;
 using Claims.Features.Covers.Services;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -14,6 +15,7 @@ public class CoverServiceTests
     private readonly Mock<ICoverRepository> _mockCoverRepository = new();
     private readonly Mock<IUnitOfWork> _mockUnitOfWork = new();
     private readonly Mock<IPremiumCalculatorService> _mockPremiumCalculatorService = new();
+    private readonly Mock<ILogger<CoverService>> _mockLogger = new();
     private readonly CoverService _service;
 
     public CoverServiceTests()
@@ -22,7 +24,8 @@ public class CoverServiceTests
             _mockAuditer.Object,
             _mockCoverRepository.Object,
             _mockUnitOfWork.Object,
-            _mockPremiumCalculatorService.Object);
+            _mockPremiumCalculatorService.Object,
+            _mockLogger.Object);
     }
 
     [Fact]

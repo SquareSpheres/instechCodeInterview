@@ -1,5 +1,6 @@
 using Claims.Auditing;
 using Claims.Core.Infrastructure;
+using Claims.Core.Exceptions;
 using Claims.Features.Covers.Mappers;
 using Claims.Features.Covers.Models;
 using Claims.Features.Covers.Repositories;
@@ -10,7 +11,8 @@ public class CoverService(
     IAuditer auditer,
     ICoverRepository coverRepository,
     IUnitOfWork unitOfWork,
-    IPremiumCalculatorService premiumCalculatorService) : ICoverService
+    IPremiumCalculatorService premiumCalculatorService,
+    ILogger<CoverService> logger) : ICoverService
 {
     public async Task<IEnumerable<CoverDto>> GetAllAsync()
     {
@@ -21,7 +23,10 @@ public class CoverService(
     public async Task<CoverDto> GetAsync(string id)
     {
         var cover = await coverRepository.GetCoverOrNullAsync(id);
-        if (cover == null) throw new KeyNotFoundException($"Cover with id {id} not found");
+        if (cover == null)
+        {
+            throw new CoverNotFoundException(id);
+        }
 
         return cover.ToDto();
     }
@@ -36,6 +41,9 @@ public class CoverService(
         await unitOfWork.SaveChangesAsync();
         auditer.AuditCover(coverEntity.Id, "POST");
 
+        logger.LogInformation("Created cover {CoverId} of type {CoverType} with premium {Premium} for period {StartDate} to {EndDate}", 
+            coverEntity.Id, dto.Type, coverEntity.Premium, dto.StartDate, dto.EndDate);
+
         return coverEntity.ToDto();
     }
 
@@ -44,6 +52,7 @@ public class CoverService(
         auditer.AuditCover(id, "DELETE");
         await coverRepository.DeleteItemAsync(id);
         await unitOfWork.SaveChangesAsync();
+        logger.LogInformation("Deleted cover {CoverId}", id);
     }
 
     public decimal ComputePremium(DateTime startDate, DateTime endDate, CoverType coverType)

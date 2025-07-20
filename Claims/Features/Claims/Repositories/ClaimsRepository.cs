@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Claims.Features.Claims.Repositories;
 
-public class ClaimsRepository(ClaimsContext claimsContext) : IClaimsRepository
+public class ClaimsRepository(ClaimsContext claimsContext, ILogger<ClaimsRepository> logger) : IClaimsRepository
 {
     public async Task<IEnumerable<ClaimEntity>> GetClaimsAsync()
     {
@@ -26,6 +26,13 @@ public class ClaimsRepository(ClaimsContext claimsContext) : IClaimsRepository
     public async Task DeleteItemAsync(string id)
     {
         var claim = await GetClaimOrNullAsync(id);
-        if (claim is not null) claimsContext.Claims.Remove(claim);
+        if (claim is not null) 
+        {
+            claimsContext.Claims.Remove(claim);
+        }
+        else
+        {
+            logger.LogWarning("Attempted to delete non-existent claim: {ClaimId}", id);
+        }
     }
 }

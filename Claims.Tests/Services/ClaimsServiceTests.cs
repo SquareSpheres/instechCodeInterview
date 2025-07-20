@@ -1,10 +1,12 @@
 using Claims.Auditing;
+using Claims.Core.Exceptions;
 using Claims.Core.Infrastructure;
 using Claims.Features.Claims.Models;
 using Claims.Features.Claims.Repositories;
 using Claims.Features.Claims.Services;
 using Claims.Features.Covers.Models;
 using Claims.Features.Covers.Repositories;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -16,6 +18,7 @@ public class ClaimsServiceTests
     private readonly Mock<IClaimsRepository> _mockClaimsRepository = new();
     private readonly Mock<ICoverRepository> _mockCoverRepository = new();
     private readonly Mock<IUnitOfWork> _mockUnitOfWork = new();
+    private readonly Mock<ILogger<ClaimsService>> _mockLogger = new();
     private readonly ClaimsService _service;
 
     public ClaimsServiceTests()
@@ -24,7 +27,8 @@ public class ClaimsServiceTests
             _mockAuditer.Object,
             _mockClaimsRepository.Object,
             _mockCoverRepository.Object,
-            _mockUnitOfWork.Object);
+            _mockUnitOfWork.Object,
+            _mockLogger.Object);
     }
 
     [Fact]
@@ -90,7 +94,8 @@ public class ClaimsServiceTests
             .ReturnsAsync(coverEntity);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(createClaimDto));
+        var exception = await Assert.ThrowsAsync<CoverageValidationException>(() => _service.CreateAsync(createClaimDto));
         Assert.Contains("Claims can only be made during the coverage period", exception.Message);
+        Assert.Equal("cover-1", exception.CoverId);
     }
 }

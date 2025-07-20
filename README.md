@@ -15,6 +15,9 @@
 
 ### Infrastructure
 -  Separate contexts for main data (ClaimsContext) and auditing (AuditContext)
+-  Global exception handler using `IExceptionHandler` with `ProblemDetails` responses
+-  Custom domain exceptions (ClaimNotFoundException, CoverNotFoundException, etc.)
+-  Strategic logging focused on business events and error scenarios
 
 ## Task 2: Validation Implementation ✅
 

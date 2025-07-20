@@ -1,13 +1,22 @@
 using Claims.Features.Covers.Models;
 using Claims.Features.Covers.Services;
 using Claims.Features.Covers.Services.PremiumTiers;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace Claims.Tests.Services;
 
 public class PremiumCalculatorServiceTests
 {
-    private readonly PremiumCalculatorService _service = new(new PremiumTierFactory());
+    private readonly Mock<ILogger<PremiumCalculatorService>> _mockLogger = new();
+
+    private readonly PremiumCalculatorService _service;
+
+    public PremiumCalculatorServiceTests()
+    {
+        _service = new PremiumCalculatorService(new PremiumTierFactory(), _mockLogger.Object);
+    }
 
     [Fact]
     public void ComputePremium_YachtFor30Days_ReturnsCorrectBasePremium()
