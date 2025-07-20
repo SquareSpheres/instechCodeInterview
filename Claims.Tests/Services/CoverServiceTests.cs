@@ -13,9 +13,9 @@ public class CoverServiceTests
 {
     private readonly Mock<IAuditer> _mockAuditer = new();
     private readonly Mock<ICoverRepository> _mockCoverRepository = new();
-    private readonly Mock<IUnitOfWork> _mockUnitOfWork = new();
-    private readonly Mock<IPremiumCalculatorService> _mockPremiumCalculatorService = new();
     private readonly Mock<ILogger<CoverService>> _mockLogger = new();
+    private readonly Mock<IPremiumCalculatorService> _mockPremiumCalculatorService = new();
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork = new();
     private readonly CoverService _service;
 
     public CoverServiceTests()
@@ -42,9 +42,9 @@ public class CoverServiceTests
 
         var calculatedPremium = 41250m; // Expected premium from calculator
         _mockPremiumCalculatorService.Setup(x => x.ComputePremium(
-            createCoverDto.StartDate, 
-            createCoverDto.EndDate, 
-            createCoverDto.Type))
+                createCoverDto.StartDate,
+                createCoverDto.EndDate,
+                createCoverDto.Type))
             .Returns(calculatedPremium);
 
         // Act
@@ -54,7 +54,7 @@ public class CoverServiceTests
         Assert.Equal(calculatedPremium, result.Premium);
         Assert.Equal(createCoverDto.Type, result.Type);
         Assert.NotNull(result.Id);
-        
+
         _mockCoverRepository.Verify(x => x.AddItemAsync(It.IsAny<CoverEntity>()), Times.Once);
         _mockUnitOfWork.Verify(x => x.SaveChangesAsync(default), Times.Once);
         _mockAuditer.Verify(x => x.AuditCover(It.IsAny<string>(), "POST"), Times.Once);

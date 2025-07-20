@@ -17,8 +17,8 @@ public class ClaimsServiceTests
     private readonly Mock<IAuditer> _mockAuditer = new();
     private readonly Mock<IClaimsRepository> _mockClaimsRepository = new();
     private readonly Mock<ICoverRepository> _mockCoverRepository = new();
-    private readonly Mock<IUnitOfWork> _mockUnitOfWork = new();
     private readonly Mock<ILogger<ClaimsService>> _mockLogger = new();
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork = new();
     private readonly ClaimsService _service;
 
     public ClaimsServiceTests()
@@ -63,7 +63,7 @@ public class ClaimsServiceTests
         Assert.Equal(createClaimDto.Name, result.Name);
         Assert.Equal(createClaimDto.Type, result.Type);
         Assert.Equal(createClaimDto.DamageCost, result.DamageCost);
-        
+
         _mockClaimsRepository.Verify(x => x.AddItemAsync(It.IsAny<ClaimEntity>()), Times.Once);
         _mockUnitOfWork.Verify(x => x.SaveChangesAsync(default), Times.Once);
         _mockAuditer.Verify(x => x.AuditClaim(It.IsAny<string>(), "POST"), Times.Once);
@@ -94,7 +94,8 @@ public class ClaimsServiceTests
             .ReturnsAsync(coverEntity);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<CoverageValidationException>(() => _service.CreateAsync(createClaimDto));
+        var exception =
+            await Assert.ThrowsAsync<CoverageValidationException>(() => _service.CreateAsync(createClaimDto));
         Assert.Contains("Claims can only be made during the coverage period", exception.Message);
         Assert.Equal("cover-1", exception.CoverId);
     }

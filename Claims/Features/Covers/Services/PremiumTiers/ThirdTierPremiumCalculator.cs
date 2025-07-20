@@ -14,14 +14,14 @@ public class ThirdTierPremiumCalculator : IPremiumTier
     {
         if (numberOfDays <= TierStartDay - 1)
             return 0m;
-            
+
         var daysInTier = numberOfDays - (TierStartDay - 1);
-        
+
         var secondTierDiscount = coverType == CoverType.Yacht ? YachtSecondTierDiscount : OtherTypesSecondTierDiscount;
         var additionalDiscount = coverType == CoverType.Yacht ? YachtAdditionalDiscount : OtherTypesAdditionalDiscount;
         var totalDiscount = secondTierDiscount + additionalDiscount;
         var discountedRate = basePremiumPerDay * (1 - totalDiscount);
-        
+
         return daysInTier * discountedRate;
     }
 }

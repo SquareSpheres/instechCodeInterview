@@ -1,6 +1,6 @@
 using Claims.Auditing;
-using Claims.Core.Infrastructure;
 using Claims.Core.Exceptions;
+using Claims.Core.Infrastructure;
 using Claims.Features.Covers.Mappers;
 using Claims.Features.Covers.Models;
 using Claims.Features.Covers.Repositories;
@@ -23,10 +23,7 @@ public class CoverService(
     public async Task<CoverDto> GetAsync(string id)
     {
         var cover = await coverRepository.GetCoverOrNullAsync(id);
-        if (cover == null)
-        {
-            throw new CoverNotFoundException(id);
-        }
+        if (cover == null) throw new CoverNotFoundException(id);
 
         return cover.ToDto();
     }
@@ -41,7 +38,8 @@ public class CoverService(
         await unitOfWork.SaveChangesAsync();
         auditer.AuditCover(coverEntity.Id, "POST");
 
-        logger.LogInformation("Created cover {CoverId} of type {CoverType} with premium {Premium} for period {StartDate} to {EndDate}", 
+        logger.LogInformation(
+            "Created cover {CoverId} of type {CoverType} with premium {Premium} for period {StartDate} to {EndDate}",
             coverEntity.Id, dto.Type, coverEntity.Premium, dto.StartDate, dto.EndDate);
 
         return coverEntity.ToDto();

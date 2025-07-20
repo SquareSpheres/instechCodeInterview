@@ -16,9 +16,7 @@ public class InMemoryAuditQueue(ILogger<InMemoryAuditQueue> logger) : IAuditQueu
         try
         {
             if (!_channel.Writer.TryWrite(item))
-            {
                 logger.LogError("Failed to enqueue audit item of type {ItemType}", typeof(T).Name);
-            }
         }
         catch (Exception ex)
         {
@@ -49,5 +47,3 @@ public class InMemoryAuditQueue(ILogger<InMemoryAuditQueue> logger) : IAuditQueu
         }
     }
 }
-
-

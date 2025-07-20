@@ -8,8 +8,7 @@ public class ClaimEntity
 
     [BsonElement("coverId")] public string CoverId { get; set; } = null!;
 
-    [BsonElement("created")]
-    public DateOnly Created { get; set; }
+    [BsonElement("created")] public DateOnly Created { get; set; }
 
     [BsonElement("name")] public string Name { get; set; } = null!;
 

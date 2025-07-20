@@ -7,8 +7,8 @@ namespace Claims.Tests.Auditing;
 
 public class AuditerTests
 {
-    private readonly Mock<IAuditQueue> _mockAuditQueue = new();
     private readonly Auditer _auditer;
+    private readonly Mock<IAuditQueue> _mockAuditQueue = new();
 
     public AuditerTests()
     {

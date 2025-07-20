@@ -26,13 +26,9 @@ public class ClaimsRepository(ClaimsContext claimsContext, ILogger<ClaimsReposit
     public async Task DeleteItemAsync(string id)
     {
         var claim = await GetClaimOrNullAsync(id);
-        if (claim is not null) 
-        {
+        if (claim is not null)
             claimsContext.Claims.Remove(claim);
-        }
         else
-        {
             logger.LogWarning("Attempted to delete non-existent claim: {ClaimId}", id);
-        }
     }
 }

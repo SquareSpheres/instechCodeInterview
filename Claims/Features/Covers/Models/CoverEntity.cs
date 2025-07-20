@@ -6,11 +6,9 @@ public class CoverEntity
 {
     [BsonId] public string Id { get; set; } = null!;
 
-    [BsonElement("startDate")]
-    public DateOnly StartDate { get; set; }
+    [BsonElement("startDate")] public DateOnly StartDate { get; set; }
 
-    [BsonElement("endDate")]
-    public DateOnly EndDate { get; set; }
+    [BsonElement("endDate")] public DateOnly EndDate { get; set; }
 
     [BsonElement("claimType")] public CoverType Type { get; set; }
 

@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Claims.Auditing.BackgroundProcessing;
 
 public interface IAuditQueue

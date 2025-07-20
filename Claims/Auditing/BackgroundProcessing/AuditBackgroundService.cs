@@ -10,21 +10,16 @@ public class AuditBackgroundService(
         logger.LogInformation("AuditBackgroundService is starting.");
 
         while (!stoppingToken.IsCancellationRequested)
-        {
             try
             {
                 var auditEntity = await auditQueue.DequeueAsync(stoppingToken);
 
-                if (auditEntity != null)
-                {
-                    await ProcessAuditAsync(auditEntity, stoppingToken);
-                }
+                if (auditEntity != null) await ProcessAuditAsync(auditEntity, stoppingToken);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error occurred processing audit entity.");
             }
-        }
 
         logger.LogInformation("AuditBackgroundService is stopping.");
     }

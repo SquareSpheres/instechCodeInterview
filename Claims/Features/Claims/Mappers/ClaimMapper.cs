@@ -10,7 +10,7 @@ public static partial class ClaimMapper
     [MapperIgnoreTarget(nameof(ClaimEntity.Created))]
     public static partial ClaimEntity ToEntity(this CreateClaimDto dto);
 
-  
+
     [MapperIgnoreSource(nameof(ClaimEntity.Created))]
     public static partial ClaimDto ToDto(this ClaimEntity dto);
 }

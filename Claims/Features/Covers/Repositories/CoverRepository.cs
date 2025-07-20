@@ -26,13 +26,9 @@ public class CoverRepository(ClaimsContext claimsContext, ILogger<CoverRepositor
     public async Task DeleteItemAsync(string id)
     {
         var cover = await GetCoverOrNullAsync(id);
-        if (cover is not null) 
-        {
+        if (cover is not null)
             claimsContext.Covers.Remove(cover);
-        }
         else
-        {
             logger.LogWarning("Attempted to delete non-existent cover: {CoverId}", id);
-        }
     }
 }

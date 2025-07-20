@@ -1,6 +1,6 @@
 using Claims.Auditing;
-using Claims.Core.Infrastructure;
 using Claims.Core.Exceptions;
+using Claims.Core.Infrastructure;
 using Claims.Features.Claims.Mappers;
 using Claims.Features.Claims.Models;
 using Claims.Features.Claims.Repositories;
@@ -32,10 +32,10 @@ public class ClaimsService(
         await claimsRepository.AddItemAsync(claimEntity);
         await unitOfWork.SaveChangesAsync();
         auditer.AuditClaim(claimEntity.Id, "POST");
-        
-        logger.LogInformation("Created claim {ClaimId} for cover {CoverId} with damage cost {DamageCost}", 
+
+        logger.LogInformation("Created claim {ClaimId} for cover {CoverId} with damage cost {DamageCost}",
             claimEntity.Id, dto.CoverId, dto.DamageCost);
-        
+
         return claimEntity.ToDto();
     }
 
@@ -50,10 +50,7 @@ public class ClaimsService(
     public async Task<ClaimDto> GetAsync(string id)
     {
         var claim = await claimsRepository.GetClaimOrNullAsync(id);
-        if (claim == null)
-        {
-            throw new ClaimNotFoundException(id);
-        }
+        if (claim == null) throw new ClaimNotFoundException(id);
 
         return claim.ToDto();
     }
@@ -62,15 +59,10 @@ public class ClaimsService(
     {
         var cover = await coverRepository.GetCoverOrNullAsync(dto.CoverId);
 
-        if (cover == null)
-        {
-            throw new CoverNotFoundException(dto.CoverId);
-        }
+        if (cover == null) throw new CoverNotFoundException(dto.CoverId);
 
         var today = DateOnly.FromDateTime(DateTime.Now.Date);
         if (today < cover.StartDate || today > cover.EndDate)
-        {
             throw new CoverageValidationException(dto.CoverId, today, cover.StartDate, cover.EndDate);
-        }
     }
 }

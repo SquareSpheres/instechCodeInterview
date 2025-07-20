@@ -1,7 +1,7 @@
+using System.Net;
 using Claims.Core.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Claims.Core.Handlers;
 
@@ -24,7 +24,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
 
         httpContext.Response.StatusCode = problemDetails.Status ?? (int)HttpStatusCode.InternalServerError;
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
-        
+
         return true;
     }
 
@@ -54,14 +54,15 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
 
     private ProblemDetails HandleCoverageValidation(CoverageValidationException ex)
     {
-        logger.LogWarning("Coverage validation failed for cover {CoverId}: Current date {CurrentDate}, Coverage: {StartDate} to {EndDate}", 
+        logger.LogWarning(
+            "Coverage validation failed for cover {CoverId}: Current date {CurrentDate}, Coverage: {StartDate} to {EndDate}",
             ex.CoverId, ex.CurrentDate, ex.StartDate, ex.EndDate);
         return new ProblemDetails
         {
             Status = (int)HttpStatusCode.BadRequest,
             Title = "Coverage Period Validation Failed",
             Detail = ex.Message,
-            Extensions = 
+            Extensions =
             {
                 ["coverId"] = ex.CoverId,
                 ["currentDate"] = ex.CurrentDate,
@@ -73,14 +74,14 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
 
     private ProblemDetails HandleInvalidDateRange(InvalidDateRangeException ex)
     {
-        logger.LogWarning("Invalid date range: StartDate {StartDate}, EndDate {EndDate}", 
+        logger.LogWarning("Invalid date range: StartDate {StartDate}, EndDate {EndDate}",
             ex.StartDate, ex.EndDate);
         return new ProblemDetails
         {
             Status = (int)HttpStatusCode.BadRequest,
             Title = "Invalid Date Range",
             Detail = ex.Message,
-            Extensions = 
+            Extensions =
             {
                 ["startDate"] = ex.StartDate,
                 ["endDate"] = ex.EndDate

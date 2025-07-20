@@ -14,14 +14,14 @@ public class SecondTierPremiumCalculator : IPremiumTier
         // Following 150 days (days 31-180) with discount
         if (numberOfDays <= TierStartDay - 1)
             return 0m;
-            
+
         var daysInTier = Math.Min(numberOfDays, TierEndDay) - (TierStartDay - 1);
         if (daysInTier <= 0)
             return 0m;
-            
+
         var discount = coverType == CoverType.Yacht ? YachtDiscount : OtherTypesDiscount;
         var discountedRate = basePremiumPerDay * (1 - discount);
-        
+
         return daysInTier * discountedRate;
     }
 }

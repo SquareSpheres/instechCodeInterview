@@ -50,18 +50,20 @@ public class PremiumCalculatorServiceTests
         var insuranceDays = (endDate - startDate).TotalDays;
         var first30Days = 30 * basePremiumPerDay;
         var next150Days = 150 * basePremiumPerDay * 0.98m; // 2% discount for non-yacht
-        var remainingDays = ((int)insuranceDays - 180) * basePremiumPerDay * 0.97m; // Additional 1% discount for non-yacht
+        var remainingDays =
+            ((int)insuranceDays - 180) * basePremiumPerDay * 0.97m; // Additional 1% discount for non-yacht
         var expected = first30Days + next150Days + remainingDays;
-        
+
         Assert.Equal(expected, premium);
     }
-    
+
     [Theory]
     [InlineData(CoverType.Yacht, 1.1)]
     [InlineData(CoverType.PassengerShip, 1.2)]
     [InlineData(CoverType.Tanker, 1.5)]
     [InlineData(CoverType.ContainerShip, 1.3)]
-    public void ComputePremium_DifferentCoverTypes_UsesCorrectMultiplier(CoverType coverType, decimal expectedMultiplier)
+    public void ComputePremium_DifferentCoverTypes_UsesCorrectMultiplier(CoverType coverType,
+        decimal expectedMultiplier)
     {
         // Test 1-day premium to isolate the multiplier
         var premium = _service.ComputePremium(DateTime.Today, DateTime.Today.AddDays(1), coverType);
